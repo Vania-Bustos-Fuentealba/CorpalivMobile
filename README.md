@@ -8,31 +8,68 @@
 
 Aplicación móvil orientada a centralizar y visibilizar las oportunidades de colaboración, programas de RSE empresarial y donaciones para la **Corporación de Padres y Amigos por el Limitado Visual (CORPALIV)**, la **Escuela Especial Jean Van Dijk** y la red sociolaboral **Alba Lab**.
 
+Repositorio de la app: <https://github.com/Vania-Bustos-Fuentealba/CorpalivMobile>
 Repositorio del backend: <https://github.com/benjamin-encina/corpaliv-backend>
+Historial de desarrollo anterior (oct–nov 2026, PR #1–#6): <https://github.com/Vania-Bustos-Fuentealba/CorpalivApp>
 
-**Contenido:** [1. Nombre](#1-nombre-del-proyecto) · [2. Integrantes](#2-integrantes) · [3. Funcionalidades](#3-funcionalidades) · [4. Endpoints](#4-endpoints-utilizados) · [5. Pasos para ejecutar](#5-pasos-para-ejecutar) · [6. APK firmado y .jks](#6-captura-del-apk-firmado-y-del-jks) · [7. Detalle técnico](#7-detalle-técnico)
+**Contenido:** [1. Nombre](#1-nombre-del-proyecto) · [2. Integrantes y aportes](#2-integrantes-y-aportes) · [3. Funcionalidades](#3-funcionalidades) · [4. Endpoints](#4-endpoints-utilizados) · [5. Pasos para ejecutar](#5-pasos-para-ejecutar) · [6. APK firmado y .jks](#6-captura-del-apk-firmado-y-del-jks) · [7. Detalle técnico](#7-detalle-técnico)
 
 ---
 
 ## 1. Nombre del proyecto
 
-**CorpalivApp** – Plataforma de Impacto Social y Vinculación Empresarial (app Android en Kotlin + Jetpack Compose, conectada a 3 microservicios Spring Boot y a una API externa).
+**CorpalivMobile** (paquete `com.duocuc.corpalivapp`) – Plataforma de Impacto Social y Vinculación Empresarial (app Android en Kotlin + Jetpack Compose, conectada a 3 microservicios Spring Boot y a una API externa).
 
 * **Desafío:** La difusión de proyectos y alternativas de vinculación institucional se encontraba dispersa en múltiples canales (reuniones, presentaciones, redes sociales), lo que dificultaba que potenciales empresas aliadas y donantes comprendieran rápidamente el impacto social y las opciones de colaboración.
 * **Solución:** Una plataforma móvil centralizada que unifica la propuesta de valor de la organización, destacando el **impacto social directo** de cada iniciativa y facilitando la vinculación directa con las distintas áreas.
 
 ---
 
-## 2. Integrantes
+## 2. Integrantes y aportes
 
-> ✍️ **Completar a mano** (solo los integrantes del grupo pueden llenar estos datos). Reemplaza cada `<...>` antes de entregar.
+| Integrante | Cuenta de GitHub | Responsabilidad principal |
+|------------|------------------|---------------------------|
+| **Vania Bustos Fuentealba** | `Vania-Bustos-Fuentealba` | Base del proyecto Android, tema y recursos; inicio adaptativo; listado de oportunidades; integración de la API externa; pruebas MockK; configuración de compilación release y JaCoCo |
+| **Benjamín Encina** | `benjamin-encina` | Navegación y menú; registro, institución y modo especial; cuenta de administrador y Dashboard; login JWT y CRUD contra los microservicios; pruebas unitarias; script de APK firmado; backend completo (`corpaliv-backend`) |
 
-| Integrante | Responsabilidad principal |
-|------------|---------------------------|
-| `<Nombre Apellido>` | `<ej: app Android: pantallas, ViewModels y pruebas>` |
-| `<Nombre Apellido>` | `<ej: backend: microservicios y base de datos>` |
+### 2.1 Aportes en este repositorio (pull requests)
 
-Tablero de planificación (Trello, RNF-10): `<URL del tablero de Trello — completar a mano>`
+Cada funcionalidad entró en su propia rama y pull request. Los datos salen del historial de `main`.
+
+| PR | Rama | Autor | Aporte |
+|----|------|-------|--------|
+| #1 | `mobile-base` | Vania | Proyecto base Android con tema, recursos y configuración de compilación |
+| #2 | `feature/inicio-modelos` | Vania | Pantalla de inicio adaptativa y modelos base |
+| #3 | `feature/navegacion-menu` | Benjamín | Navegación, menú lateral y barras superior e inferior |
+| #4 | `feature/registro-institucion` | Benjamín | Flujo de registro, institución, modo especial y almacenamiento local |
+| #5 | `feature/cuenta-administrador` | Benjamín | Cuenta de administrador con perfil y Dashboard |
+| #6 | `feature/oportunidades` | Vania | Listado de oportunidades con tarjeta y ViewModel |
+| #7 | `feature/api-externa` | Vania | Cliente Retrofit, servicio, repositorio y pantalla de la API externa |
+| #8 | `test/mockk` | Vania | Regla de corrutinas y pruebas MockK de API externa y sesión remota |
+| #9 | `feature/login-microservicios` | Benjamín | Login y sesión JWT con `auth-service` |
+| #10 | `feature/crud-oportunidades` | Benjamín | CRUD de oportunidades y aportes conectado a los microservicios |
+| #11 | `build/script-apk` | Benjamín | Script de APK firmado, cobertura ampliada y host del backend configurable |
+| #12 | `test/unitarias-app` | Benjamín | Pruebas de utilidades, modelos, clientes Retrofit, repositorios, navegación y ViewModels |
+| #13 | `docs/readme` | Benjamín | README de entrega con arquitectura, ejecución y pruebas |
+| #14 | `docs/readme-v2` | Benjamín | Este README: integrantes, aportes y enlaces a los repositorios |
+
+Pendientes del equipo (se agregan a esta tabla cuando se mergeen):
+
+| Pendiente | Responsable |
+|-----------|-------------|
+| Capturas en `docs/capturas/` (sección 6.2) | Vania |
+| Enlace público del tablero de Trello (abajo) | Vania |
+| Release `v1.0` con el APK firmado adjunto | Vania |
+| Backend: pruebas de `aportes-service`, variables de entorno y README probado (en `corpaliv-backend`) | Vania |
+
+### 2.2 Backend
+
+`corpaliv-backend` (3 microservicios Spring Boot) lo desarrolló Benjamín Encina: estructura de los microservicios,
+pruebas de base de datos y versión 1 con pruebas. Ver su README para el detalle.
+
+### 2.3 Planificación
+
+Tablero de Trello (RNF-10): `PENDIENTE: pegar aquí la URL pública del tablero`. Cada tarjeta corresponde a un PR de la tabla 2.1.
 
 ---
 
@@ -100,7 +137,7 @@ Las rutas de administrador exigen `Authorization: Bearer <token>`; sin token res
 
 1. **Clonar los dos repositorios:**
    ```powershell
-   git clone https://github.com/Vania-Bustos-Fuentealba/CorpalivApp.git
+   git clone https://github.com/Vania-Bustos-Fuentealba/CorpalivMobile.git
    git clone https://github.com/benjamin-encina/corpaliv-backend.git
    ```
 2. **Levantar el backend** (base de datos + 3 servicios) siguiendo la sección 5 del README de `corpaliv-backend`. Resumen con MySQL en Docker (publicado en el puerto **3307** del PC):
@@ -113,7 +150,7 @@ Las rutas de administrador exigen `Authorization: Bearer <token>`; sin token res
    $env:DB_PORT = "3307"; cd aportes-service;       mvn spring-boot:run "-Dspring-boot.run.profiles=mysql"   # 8082
    ```
    Sin Docker basta `mvn spring-boot:run` en cada servicio (H2 en archivo).
-3. **Abrir `CorpalivApp` en Android Studio** y esperar el *Gradle Sync*. Android Studio crea `local.properties` con `sdk.dir=...` (ignorado por Git).
+3. **Abrir `CorpalivMobile` en Android Studio** y esperar el *Gradle Sync*. Android Studio crea `local.properties` con `sdk.dir=...` (ignorado por Git).
 4. **Elegir el host del backend** (ver tabla de abajo). Sin configurar nada la app apunta a `10.0.2.2` (emulador).
 5. **Compilar y ejecutar**: ▶ Run en Android Studio o, en PowerShell, `.\gradlew.bat :app:assembleDebug` (APK en `app/build/outputs/apk/debug/`).
 6. **Iniciar sesión de demostración** (administrador): `admin@corpaliv.cl` / `admin`. Solo para el entorno académico.
@@ -159,7 +196,7 @@ Alternativa por consola: `.\scripts\generar-apk-firmado.ps1` (detalle en la secc
 
 ### 6.2 Capturas
 
-> ✍️ **Completar a mano.** Guarda las imágenes en `docs/capturas/` con estos nombres y borra los `<!--` y `-->` de cada línea para que se muestren.
+> ⏳ **Pendiente (Vania).** Guarda las imágenes en `docs/capturas/` con estos nombres y borra los `<!--` y `-->` de cada línea para que se muestren.
 
 | # | Captura | Archivo |
 |---|---------|---------|
@@ -182,7 +219,7 @@ Alternativa por consola: `.\scripts\generar-apk-firmado.ps1` (detalle en la secc
 - **Opción A (recomendada): entregar aparte.** El `.jks` real y el APK se entregan por el canal del curso (no por GitHub) y este README solo muestra las capturas. La clave real nunca queda pública.
 - **Opción B: llave solo de entrega en el repositorio.** Si la pauta exige un `.jks` funcional dentro del repositorio, generar una clave **nueva y desechable** (no la real), por ejemplo `entrega/corpaliv-entrega.jks`, agregar al final de `.gitignore` la excepción `!entrega/corpaliv-entrega.jks` e indicar aquí su alias y contraseña. Cualquiera que clone el repositorio podrá firmar con ella, así que no debe usarse para publicar la app.
 
-`<Indicar aquí la opción elegida — completar a mano>`
+`PENDIENTE: indicar aquí la opción elegida (A o B)`
 
 ---
 
@@ -265,7 +302,7 @@ La `NavigationBar` inferior se declara una sola vez en `AppNavigation` y se mues
 
 ---
 
-Ramas de evidencia en el remoto: `feature/navegacion-menu`, `feature/flujo-registro-oportunidad`, `feature/barra-institucion`, `feature/cuenta-administrador` y `feature/actualizacion-proyecto`.
+Las ramas de cada funcionalidad y sus PR están en la tabla de la sección 2.1. El historial anterior (oct–nov 2026) queda en el repositorio [`CorpalivApp`](https://github.com/Vania-Bustos-Fuentealba/CorpalivApp).
 
 ### Pruebas y cobertura
 
