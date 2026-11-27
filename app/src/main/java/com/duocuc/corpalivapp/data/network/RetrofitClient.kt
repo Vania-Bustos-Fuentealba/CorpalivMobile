@@ -1,5 +1,6 @@
 package com.duocuc.corpalivapp.data.network // Declaración del paquete al que pertenece este cliente HTTP dentro de la capa de red (Network)
 
+import com.duocuc.corpalivapp.BuildConfig // RB-08: contiene BACKEND_HOST, definido en app/build.gradle.kts
 import okhttp3.Interceptor // Importación del interceptor de OkHttp para modificar cada petición antes de enviarla
 import okhttp3.OkHttpClient // Importación del cliente HTTP de OkHttp que usa Retrofit por debajo
 import java.util.concurrent.TimeUnit // Importación de las unidades de tiempo usadas en los tiempos de espera de la red
@@ -11,8 +12,9 @@ object RetrofitClient { // Declaración de un objeto Singleton para garantizar u
     // URL base de API rest, la colocaremos aquí
     // Parcial 4: microservicios Spring Boot propios. En el emulador de Android Studio, 10.0.2.2 es el computador donde corren.
     // En un celular físico se cambia por la IP del computador en la misma red Wi-Fi.
-    private const val HOST = "http://10.0.2.2" // Dirección del computador visto desde el emulador de Android
-    private const val BASE_URL = "http://10.0.2.2:8081/api/" // Constante privada con la dirección web base para todas las llamadas a la API
+    // RB-08: el host sale de BuildConfig.BACKEND_HOST (por defecto 10.0.2.2). Para un celular físico se compila con -Pcorpaliv.backendHost=<IP-del-PC> o se define en local.properties.
+    private const val HOST = "http://${BuildConfig.BACKEND_HOST}" // Dirección del computador visto desde el emulador de Android
+    private const val BASE_URL = "$HOST:8081/api/" // Constante privada con la dirección web base para todas las llamadas a la API
 
     private const val BASE_URL_AUTH = "$HOST:8083/api/" // Base del microservicio de autenticación (auth-service)
     private const val BASE_URL_APORTES = "$HOST:8082/api/" // Base del microservicio de aportes y postulaciones (aportes-service)
