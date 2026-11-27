@@ -59,6 +59,27 @@ val signingProperties = Properties().apply { // Prepara las propiedades sin incl
     }
 }
 
+// RNF-09: si no existe keystore.properties, la firma puede entregarse por variables de entorno (solo en la sesión actual).
+fun datoDeFirma(clave: String, variableDeEntorno: String): String? = // Busca primero el archivo privado y luego la variable de entorno.
+    signingProperties.getProperty(clave) ?: System.getenv(variableDeEntorno)?.takeIf { it.isNotBlank() }
+
+// RB-08: dirección del computador donde corren los microservicios, vista desde la app.
+// Prioridad: -Pcorpaliv.backendHost=... > corpaliv.backendHost en local.properties (ignorado por Git) > 10.0.2.2 (emulador).
+val localProperties = Properties().apply { // Lee local.properties, que ya está ignorado por Git.
+    val archivoLocal = rootProject.file("local.properties") // Archivo local de cada computador.
+    if (archivoLocal.isFile) { // Si no existe se usa el valor por defecto.
+        archivoLocal.inputStream().use { load(it) } // Lee las propiedades y cierra automáticamente el archivo.
+    }
+}
+val backendHost: String = (
+    (project.findProperty("corpaliv.backendHost") as String?) // Propiedad de Gradle (línea de comandos o gradle.properties).
+        ?: localProperties.getProperty("corpaliv.backendHost") // Propiedad de local.properties.
+        ?: "10.0.2.2" // Emulador de Android Studio: el comportamiento original no cambia.
+    ).trim()
+require(Regex("[A-Za-z0-9.-]+").matches(backendHost)) { // Solo un nombre de host o IP, sin esquema, puerto ni comillas.
+    "corpaliv.backendHost debe ser solo la IP o el nombre del host (sin http:// ni puerto): '$backendHost'"
+}
+
 android {
 
     // Espacio de nombres de la aplicación.
@@ -84,6 +105,9 @@ android {
         // Versión visible para el usuario.
         versionName = "1.0"
 
+        // RB-08: host del backend que lee RetrofitClient mediante BuildConfig.BACKEND_HOST.
+        buildConfigField("String", "BACKEND_HOST", "\"$backendHost\"")
+
         // Configuración para pruebas instrumentadas.
         testInstrumentationRunner =
             "androidx.test.runner.AndroidJUnitRunner"
@@ -96,10 +120,10 @@ android {
 
     signingConfigs { // Declara cómo se firmará el APK de entrega.
         create("release") { // Crea una configuración independiente de la clave de depuración.
-            storeFile = signingProperties.getProperty("storeFile")?.let { rootProject.file(it) } // Resuelve la ruta privada del .jks.
-            storePassword = signingProperties.getProperty("storePassword") // Lee la contraseña del almacén, sin escribirla en Git.
-            keyAlias = signingProperties.getProperty("keyAlias") // Selecciona la entrada de clave que se usará dentro del almacén.
-            keyPassword = signingProperties.getProperty("keyPassword") // Lee la contraseña de esa entrada de clave.
+            storeFile = datoDeFirma("storeFile", "CORPALIV_STORE_FILE")?.let { rootProject.file(it) } // Resuelve la ruta privada del .jks.
+            storePassword = datoDeFirma("storePassword", "CORPALIV_STORE_PASSWORD") // Lee la contraseña del almacén, sin escribirla en Git.
+            keyAlias = datoDeFirma("keyAlias", "CORPALIV_KEY_ALIAS") // Selecciona la entrada de clave que se usará dentro del almacén.
+            keyPassword = datoDeFirma("keyPassword", "CORPALIV_KEY_PASSWORD") // Lee la contraseña de esa entrada de clave.
         }
     }
 
@@ -157,6 +181,9 @@ android {
 
         // Habilita la construcción de interfaces declarativas.
         compose = true
+
+        // RB-08: genera BuildConfig con el host configurable del backend.
+        buildConfig = true
     }
 }
 
@@ -387,6 +414,35 @@ jacoco {
 
 
 // ============================================================
+// 10.1 EXCLUSIONES DE COBERTURA (CAPA VISUAL)
+// ============================================================
+
+// La rúbrica exige 80 % de cobertura sobre el código lógico
+// (ViewModel, Repository, modelos, DataStore, red y utilidades).
+//
+// Se excluyen solo las clases de interfaz Compose, que se
+// validan con pruebas instrumentadas o de forma visual y no
+// con pruebas unitarias en la JVM. La justificación completa
+// está en Cobertura_JaCoCo_Logica_2026-11-27.md.
+val exclusionesCobertura = listOf(
+    "**/MainActivity*", // Actividad de arranque: solo llama a setContent.
+    "**/ComposableSingletons*", // Lambdas que genera el compilador de Compose.
+    "**/navigation/AppNavigationKt*", // NavHost con las pantallas; Screen y NavigationEvent sí se miden.
+    "**/ui/screens/**", // Pantallas Compose.
+    "**/ui/theme/**", // Colores, tipografía y tema de Material 3.
+    "**/ui/components/AppBottomBarKt*", // Barra inferior Compose.
+    "**/ui/components/AppDrawerContentKt*", // Menú lateral Compose.
+    "**/ui/components/AppTopBarKt*", // Barra superior Compose.
+    "**/ui/components/DestinoNavegacion.*", // Destinos del menú con sus íconos de Compose.
+    "**/ui/components/DestinosNavegacionKt*", // Lista de destinos del menú con íconos de Compose.
+    "**/ui/components/ImagenInteligenteKt*", // Imagen Compose con Coil.
+    "**/ui/components/MarkdownTextKt*", // Composables de Markdown; el lector se prueba en MarkdownParserTest.
+    "**/ui/components/OportunidadCardKt*", // Tarjeta Compose de oportunidad.
+    "**/util/WindowSizeUtilsKt*" // Función @Composable que calcula el tamaño de ventana.
+)
+
+
+// ============================================================
 // 11. TAREA PARA GENERAR INFORME DE COBERTURA
 // ============================================================
 
@@ -444,6 +500,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
             exclude("**/R.class")
             exclude("**/R$*.class")
             exclude("**/BuildConfig.*")
+            exclude(exclusionesCobertura) // Deja fuera la capa visual Compose (sección 10.1).
         },
 
         fileTree(
@@ -455,6 +512,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
             exclude("**/R.class")
             exclude("**/R$*.class")
             exclude("**/BuildConfig.*")
+            exclude(exclusionesCobertura) // Deja fuera la capa visual Compose (sección 10.1).
         }
     )
 
@@ -488,5 +546,44 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
         // Desactiva el formato CSV.
         csv.required.set(false)
+    }
+}
+
+// ============================================================
+// 12. VERIFICACIÓN DEL MÍNIMO DE COBERTURA (80 %)
+// ============================================================
+
+// Esta tarea se puede ejecutar desde Gradle mediante:
+//
+// :app:jacocoTestCoverageVerification
+//
+// Usa los mismos datos y clases que el informe de la sección 11
+// y hace fallar la compilación si la cobertura de instrucciones
+// o de líneas del código lógico baja del 80 %.
+
+val informeCobertura = tasks.named<JacocoReport>("jacocoTestReport")
+
+tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+
+    // Primero se generan las pruebas y el informe.
+    dependsOn(informeCobertura)
+
+    executionData.setFrom(informeCobertura.map { it.executionData }) // Mismos archivos .exec del informe.
+    classDirectories.setFrom(informeCobertura.map { it.classDirectories }) // Mismas clases, ya sin la capa visual.
+    sourceDirectories.setFrom(informeCobertura.map { it.sourceDirectories }) // Mismo código fuente.
+
+    violationRules {
+        rule {
+            limit {
+                counter = "INSTRUCTION" // Instrucciones de bytecode ejecutadas.
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal() // Mínimo exigido por la rúbrica.
+            }
+            limit {
+                counter = "LINE" // Líneas de código ejecutadas.
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
     }
 }

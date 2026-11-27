@@ -19,3 +19,11 @@ local.properties
 *.keystore
 /keystore.properties
 /signing/
+
+# RNF-09: otros formatos de almacén de claves y archivos de entorno con credenciales.
+*.p12
+*.pfx
+.env
+
+# APK de entrega generado por Android Studio: se entrega aparte, no se versiona.
+/app/release/
